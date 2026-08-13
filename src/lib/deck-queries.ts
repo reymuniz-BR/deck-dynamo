@@ -61,7 +61,7 @@ export async function addSource(input: {
   deckId: string;
   workspaceId: string;
   userId: string;
-  kind: "note" | "file";
+  kind: "note" | "file" | "reference";
   label: string;
   relevance: string;
   whyRelevant?: string;
