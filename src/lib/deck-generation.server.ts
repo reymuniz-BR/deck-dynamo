@@ -110,19 +110,19 @@ async function loadDeck(supabase: Db, deckId: string) {
 export async function generateDeckOutline(supabase: Db, deckId: string) {
   const { deck, sourceContext } = await loadDeck(supabase, deckId);
 
-  const result = streamText({
-    model: model(),
+  const output = await generateStructured(outlineSchema, {
     system: SYSTEM_PROMPT,
     prompt: outlinePrompt({
       brief: deck.project_brief ?? "",
       clientName: deck.client_name,
       sourceContext,
     }),
-    output: Output.object({ schema: outlineSchema }),
   });
 
-  const output = await result.output;
-  const outline: OutlineItem[] = output.slides.slice(0, 20);
+  const outline: OutlineItem[] = output.slides
+    .slice(0, 20)
+    .map((item) => ({ title: item.title, purpose: item.purpose ?? "" }));
+  if (outline.length === 0) throw new Error("The AI did not return any slides. Please try again.");
 
   const { error } = await supabase
     .from("decks")
