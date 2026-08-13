@@ -64,9 +64,10 @@ export async function addSource(input: {
   kind: "note" | "file" | "reference";
   label: string;
   relevance: string;
-  whyRelevant?: string;
-  extractedText?: string;
-  filePath?: string | null;
+  whyRelevant?: string | undefined;
+  extractedText?: string | undefined;
+  filePath?: string | null | undefined;
+
 }) {
   const { error } = await supabase.from("deck_sources").insert({
     deck_id: input.deckId,
