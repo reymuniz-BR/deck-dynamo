@@ -16,6 +16,7 @@ import { Route as AuthenticatedDecksIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedDecksNewRouteImport } from './routes/_authenticated/decks/new'
 import { Route as AuthenticatedDecksDeckIdIndexRouteImport } from './routes/_authenticated/decks/$deckId/index'
 import { Route as AuthenticatedDecksDeckIdIntakeRouteImport } from './routes/_authenticated/decks/$deckId/intake'
+import { Route as AuthenticatedDecksDeckIdPrintRouteImport } from './routes/_authenticated/decks/$deckId/print'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -53,6 +54,12 @@ const AuthenticatedDecksDeckIdIntakeRoute =
     path: '/decks/$deckId/intake',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDecksDeckIdPrintRoute =
+  AuthenticatedDecksDeckIdPrintRouteImport.update({
+    id: '/decks/$deckId/print',
+    path: '/decks/$deckId/print',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -60,6 +67,7 @@ export interface FileRoutesByFullPath {
   '/decks/new': typeof AuthenticatedDecksNewRoute
   '/decks/': typeof AuthenticatedDecksIndexRoute
   '/decks/$deckId/intake': typeof AuthenticatedDecksDeckIdIntakeRoute
+  '/decks/$deckId/print': typeof AuthenticatedDecksDeckIdPrintRoute
   '/decks/$deckId/': typeof AuthenticatedDecksDeckIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -68,6 +76,7 @@ export interface FileRoutesByTo {
   '/decks/new': typeof AuthenticatedDecksNewRoute
   '/decks': typeof AuthenticatedDecksIndexRoute
   '/decks/$deckId/intake': typeof AuthenticatedDecksDeckIdIntakeRoute
+  '/decks/$deckId/print': typeof AuthenticatedDecksDeckIdPrintRoute
   '/decks/$deckId': typeof AuthenticatedDecksDeckIdIndexRoute
 }
 export interface FileRoutesById {
@@ -78,6 +87,7 @@ export interface FileRoutesById {
   '/_authenticated/decks/new': typeof AuthenticatedDecksNewRoute
   '/_authenticated/decks/': typeof AuthenticatedDecksIndexRoute
   '/_authenticated/decks/$deckId/intake': typeof AuthenticatedDecksDeckIdIntakeRoute
+  '/_authenticated/decks/$deckId/print': typeof AuthenticatedDecksDeckIdPrintRoute
   '/_authenticated/decks/$deckId/': typeof AuthenticatedDecksDeckIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -88,6 +98,7 @@ export interface FileRouteTypes {
     | '/decks/new'
     | '/decks/'
     | '/decks/$deckId/intake'
+    | '/decks/$deckId/print'
     | '/decks/$deckId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -96,6 +107,7 @@ export interface FileRouteTypes {
     | '/decks/new'
     | '/decks'
     | '/decks/$deckId/intake'
+    | '/decks/$deckId/print'
     | '/decks/$deckId'
   id:
     | '__root__'
@@ -105,6 +117,7 @@ export interface FileRouteTypes {
     | '/_authenticated/decks/new'
     | '/_authenticated/decks/'
     | '/_authenticated/decks/$deckId/intake'
+    | '/_authenticated/decks/$deckId/print'
     | '/_authenticated/decks/$deckId/'
   fileRoutesById: FileRoutesById
 }
@@ -165,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDecksDeckIdIntakeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/decks/$deckId/print': {
+      id: '/_authenticated/decks/$deckId/print'
+      path: '/decks/$deckId/print'
+      fullPath: '/decks/$deckId/print'
+      preLoaderRoute: typeof AuthenticatedDecksDeckIdPrintRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -172,6 +192,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDecksNewRoute: typeof AuthenticatedDecksNewRoute
   AuthenticatedDecksIndexRoute: typeof AuthenticatedDecksIndexRoute
   AuthenticatedDecksDeckIdIntakeRoute: typeof AuthenticatedDecksDeckIdIntakeRoute
+  AuthenticatedDecksDeckIdPrintRoute: typeof AuthenticatedDecksDeckIdPrintRoute
   AuthenticatedDecksDeckIdIndexRoute: typeof AuthenticatedDecksDeckIdIndexRoute
 }
 
@@ -179,6 +200,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDecksNewRoute: AuthenticatedDecksNewRoute,
   AuthenticatedDecksIndexRoute: AuthenticatedDecksIndexRoute,
   AuthenticatedDecksDeckIdIntakeRoute: AuthenticatedDecksDeckIdIntakeRoute,
+  AuthenticatedDecksDeckIdPrintRoute: AuthenticatedDecksDeckIdPrintRoute,
   AuthenticatedDecksDeckIdIndexRoute: AuthenticatedDecksDeckIdIndexRoute,
 }
 
