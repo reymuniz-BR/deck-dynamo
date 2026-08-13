@@ -67,7 +67,7 @@ export async function addSource(input: {
   whyRelevant?: string | undefined;
   extractedText?: string | undefined;
   filePath?: string | null | undefined;
-
+  brand?: unknown;
 }) {
   const { error } = await supabase.from("deck_sources").insert({
     deck_id: input.deckId,
@@ -79,6 +79,7 @@ export async function addSource(input: {
     why_relevant: input.whyRelevant ?? null,
     extracted_text: input.extractedText ?? null,
     file_path: input.filePath ?? null,
+    brand: (input.brand ?? null) as never,
   });
   if (error) throw new Error(error.message);
 }
@@ -88,4 +89,12 @@ export async function uploadSourceFile(workspaceId: string, deckId: string, file
   const { error } = await supabase.storage.from("deck-sources").upload(path, file);
   if (error) throw new Error(error.message);
   return path;
+}
+
+export async function setDeckBrand(deckId: string, brand: unknown) {
+  const { error } = await supabase
+    .from("decks")
+    .update({ brand: brand as never })
+    .eq("id", deckId);
+  if (error) throw new Error(error.message);
 }

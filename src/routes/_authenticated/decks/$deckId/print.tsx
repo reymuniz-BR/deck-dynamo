@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { SlidePreview } from "@/components/SlidePreview";
 import { Button } from "@/components/ui/button";
 import { getDeck, getSlides } from "@/lib/deck-queries";
+import { brandOrDefault } from "@/lib/brand";
 
 export const Route = createFileRoute("/_authenticated/decks/$deckId/print")({
   head: () => ({
@@ -25,6 +26,7 @@ function PrintView() {
   const slidesQuery = useQuery({ queryKey: ["slides", deckId], queryFn: () => getSlides(deckId) });
 
   const slides = slidesQuery.data ?? [];
+  const brand = brandOrDefault(deckQuery.data?.brand);
 
   return (
     <div className="min-h-screen bg-muted/40 py-10">
@@ -41,7 +43,7 @@ function PrintView() {
       <div className="mx-auto max-w-4xl space-y-8 px-6">
         {slides.map((slide, i) => (
           <div key={slide.id} className="break-inside-avoid">
-            <SlidePreview slide={slide} index={i} />
+            <SlidePreview slide={slide} index={i} brand={brand} />
           </div>
         ))}
       </div>

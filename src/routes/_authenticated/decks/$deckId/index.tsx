@@ -23,6 +23,7 @@ import { getDeck, getSlides } from "@/lib/deck-queries";
 import { regenerateSlide } from "@/lib/deck.functions";
 import { exportDeckToPptx } from "@/lib/export-pptx";
 import type { Slide } from "@/lib/deck-types";
+import { brandOrDefault } from "@/lib/brand";
 
 const LAYOUTS = ["title", "bullets", "two-column", "stat", "quote", "closing"];
 
@@ -58,6 +59,7 @@ function DeckEditor() {
   const slidesQuery = useQuery({ queryKey: ["slides", deckId], queryFn: () => getSlides(deckId) });
 
   const slides = slidesQuery.data ?? [];
+  const brand = brandOrDefault(deckQuery.data?.brand);
   const active = slides.find((s) => s.id === activeId) ?? slides[0] ?? null;
 
   useEffect(() => {
@@ -123,7 +125,7 @@ function DeckEditor() {
   async function downloadPptx() {
     setBusy("pptx");
     try {
-      await exportDeckToPptx(deck!, slides);
+      await exportDeckToPptx(deck!, slides, brand);
       toast.success("PowerPoint downloaded");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Export failed");
@@ -159,6 +161,19 @@ function DeckEditor() {
             <p className="mt-2 text-sm text-muted-foreground">
               {slides.length} slides · review, rewrite, export
             </p>
+            <div className="mt-3 flex items-center gap-2">
+              <span className="label-caps text-muted-foreground">Branding</span>
+              <span className="flex items-center gap-1">
+                {[brand.colors.dark, brand.colors.accent, brand.colors.tint].map((c) => (
+                  <span
+                    key={c}
+                    className="h-3.5 w-3.5 border border-border"
+                    style={{ background: c }}
+                  />
+                ))}
+              </span>
+              <span className="truncate text-xs text-muted-foreground">{brand.source}</span>
+            </div>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" onClick={downloadPptx} disabled={busy === "pptx"}>
@@ -208,14 +223,14 @@ function DeckEditor() {
                       : "border-border hover:border-muted-foreground/40"
                   }`}
                 >
-                  <SlidePreview slide={slide} index={i} />
+                  <SlidePreview slide={slide} index={i} brand={brand} />
                   <p className="mt-1.5 truncate text-xs text-muted-foreground">{slide.title}</p>
                 </button>
               ))}
             </aside>
 
             <div>
-              {draft ? <SlidePreview slide={draft} index={slides.indexOf(active!)} /> : null}
+              {draft ? <SlidePreview slide={draft} index={slides.indexOf(active!)} brand={brand} /> : null}
 
               <div className="mt-6 border border-border bg-card p-5">
                 <p className="label-caps text-muted-foreground">Rewrite with AI</p>

@@ -20,6 +20,7 @@ export type Deck = {
   stage: string;
   outline: { title: string; purpose: string }[];
   google_slides_url: string | null;
+  brand: unknown | null;
   created_at: string;
   updated_at: string;
 };
@@ -34,6 +35,7 @@ export type DeckSource = {
   why_relevant: string | null;
   extracted_text: string | null;
   file_path: string | null;
+  brand: unknown | null;
   created_at: string;
 };
 
