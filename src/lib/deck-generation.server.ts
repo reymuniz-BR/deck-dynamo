@@ -141,8 +141,7 @@ export async function generateDeckSlides(supabase: Db, deckId: string) {
   await supabase.from("decks").update({ stage: "generating" }).eq("id", deckId);
 
   try {
-    const result = streamText({
-      model: model(),
+    const output = await generateStructured(slidesSchema, {
       system: SYSTEM_PROMPT,
       prompt: slidesPrompt({
         brief: deck.project_brief ?? "",
@@ -150,10 +149,11 @@ export async function generateDeckSlides(supabase: Db, deckId: string) {
         sourceContext,
         outline,
       }),
-      output: Output.object({ schema: slidesSchema }),
     });
 
-    const output = await result.output;
+    if (output.slides.length === 0) {
+      throw new Error("The AI did not return any slides. Please try again.");
+    }
 
     await supabase.from("slides").delete().eq("deck_id", deckId);
 
