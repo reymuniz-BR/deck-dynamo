@@ -42,8 +42,8 @@ A guided, step-by-step flow (one prompt per screen, with progress saved as you g
 
 ## Build order
 
-1. Enable Cloud, auth, schema + RLS.
-2. Template upload and structure extraction.
-3. New-deck wizard and AI generation.
-4. Deck editor with per-slide regeneration.
-5. PPTX and PDF export.
+1. Enable Cloud, auth, workspace schema + RLS.
+2. Guided intake flow with file/note uploads and source tagging.
+3. Outline proposal + AI slide generation.
+4. Deck editor with per-slide regeneration and shared editing.
+5. Google Slides export, then PPTX/PDF.
