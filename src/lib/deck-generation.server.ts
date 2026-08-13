@@ -21,17 +21,17 @@ const outlineSchema = z.object({
   slides: z.array(
     z.object({
       title: z.string(),
-      purpose: z.string().nullable().default(""),
+      purpose: z.string().nullable(),
     }),
   ),
 });
 
 const slideSchema = z.object({
   title: z.string(),
-  subtitle: z.string().nullable().default(null),
-  bullets: z.array(z.string()).nullable().default([]),
-  speakerNotes: z.string().nullable().default(""),
-  layout: z.string().nullable().default("bullets"),
+  subtitle: z.string().nullable(),
+  bullets: z.array(z.string()),
+  speakerNotes: z.string(),
+  layout: z.string(),
 });
 
 const slidesSchema = z.object({ slides: z.array(slideSchema) });
