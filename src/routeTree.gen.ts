@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedDecksIndexRouteImport } from './routes/_authenticated/decks/index'
 import { Route as AuthenticatedDecksNewRouteImport } from './routes/_authenticated/decks/new'
+import { Route as AuthenticatedDecksDeckIdIntakeRouteImport } from './routes/_authenticated/decks/$deckId/intake'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -39,18 +40,26 @@ const AuthenticatedDecksNewRoute = AuthenticatedDecksNewRouteImport.update({
   path: '/decks/new',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDecksDeckIdIntakeRoute =
+  AuthenticatedDecksDeckIdIntakeRouteImport.update({
+    id: '/decks/$deckId/intake',
+    path: '/decks/$deckId/intake',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/decks/new': typeof AuthenticatedDecksNewRoute
   '/decks/': typeof AuthenticatedDecksIndexRoute
+  '/decks/$deckId/intake': typeof AuthenticatedDecksDeckIdIntakeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/decks/new': typeof AuthenticatedDecksNewRoute
   '/decks': typeof AuthenticatedDecksIndexRoute
+  '/decks/$deckId/intake': typeof AuthenticatedDecksDeckIdIntakeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -59,12 +68,13 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/decks/new': typeof AuthenticatedDecksNewRoute
   '/_authenticated/decks/': typeof AuthenticatedDecksIndexRoute
+  '/_authenticated/decks/$deckId/intake': typeof AuthenticatedDecksDeckIdIntakeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/decks/new' | '/decks/'
+  fullPaths: '/' | '/auth' | '/decks/new' | '/decks/' | '/decks/$deckId/intake'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/decks/new' | '/decks'
+  to: '/' | '/auth' | '/decks/new' | '/decks' | '/decks/$deckId/intake'
   id:
     | '__root__'
     | '/'
@@ -72,6 +82,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/decks/new'
     | '/_authenticated/decks/'
+    | '/_authenticated/decks/$deckId/intake'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -117,17 +128,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDecksNewRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/decks/$deckId/intake': {
+      id: '/_authenticated/decks/$deckId/intake'
+      path: '/decks/$deckId/intake'
+      fullPath: '/decks/$deckId/intake'
+      preLoaderRoute: typeof AuthenticatedDecksDeckIdIntakeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDecksNewRoute: typeof AuthenticatedDecksNewRoute
   AuthenticatedDecksIndexRoute: typeof AuthenticatedDecksIndexRoute
+  AuthenticatedDecksDeckIdIntakeRoute: typeof AuthenticatedDecksDeckIdIntakeRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDecksNewRoute: AuthenticatedDecksNewRoute,
   AuthenticatedDecksIndexRoute: AuthenticatedDecksIndexRoute,
+  AuthenticatedDecksDeckIdIntakeRoute: AuthenticatedDecksDeckIdIntakeRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
