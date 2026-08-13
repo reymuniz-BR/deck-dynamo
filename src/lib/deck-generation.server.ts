@@ -67,7 +67,7 @@ function extractJson(text: string | undefined): unknown {
  */
 async function generateStructured<T extends z.ZodTypeAny>(
   schema: T,
-  args: { system: string; prompt: string },
+  args: { system: string; prompt: string; arrayKey?: string },
 ): Promise<z.infer<T>> {
   try {
     const result = streamText({
@@ -79,7 +79,11 @@ async function generateStructured<T extends z.ZodTypeAny>(
     return (await result.output) as z.infer<T>;
   } catch (error) {
     if (NoObjectGeneratedError.isInstance(error)) {
-      const parsed = schema.safeParse(extractJson(error.text));
+      const raw = extractJson(error.text);
+      // Models sometimes answer with a bare array instead of the wrapper object.
+      const candidate =
+        Array.isArray(raw) && args.arrayKey ? { [args.arrayKey]: raw } : raw;
+      const parsed = schema.safeParse(candidate);
       if (parsed.success) return parsed.data as z.infer<T>;
     }
     throw new Error(
