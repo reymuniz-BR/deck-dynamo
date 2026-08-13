@@ -14,13 +14,256 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      deck_sources: {
+        Row: {
+          created_at: string
+          created_by: string
+          deck_id: string
+          extracted_text: string | null
+          file_path: string | null
+          id: string
+          kind: string
+          label: string
+          relevance: string
+          why_relevant: string | null
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          deck_id: string
+          extracted_text?: string | null
+          file_path?: string | null
+          id?: string
+          kind?: string
+          label?: string
+          relevance?: string
+          why_relevant?: string | null
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          deck_id?: string
+          extracted_text?: string | null
+          file_path?: string | null
+          id?: string
+          kind?: string
+          label?: string
+          relevance?: string
+          why_relevant?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deck_sources_deck_id_fkey"
+            columns: ["deck_id"]
+            isOneToOne: false
+            referencedRelation: "decks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deck_sources_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      decks: {
+        Row: {
+          client_name: string | null
+          created_at: string
+          created_by: string
+          google_slides_url: string | null
+          id: string
+          outline: Json
+          project_brief: string | null
+          stage: string
+          title: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          client_name?: string | null
+          created_at?: string
+          created_by: string
+          google_slides_url?: string | null
+          id?: string
+          outline?: Json
+          project_brief?: string | null
+          stage?: string
+          title?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          client_name?: string | null
+          created_at?: string
+          created_by?: string
+          google_slides_url?: string | null
+          id?: string
+          outline?: Json
+          project_brief?: string | null
+          stage?: string
+          title?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decks_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      slides: {
+        Row: {
+          bullets: Json
+          created_at: string
+          deck_id: string
+          id: string
+          layout: string
+          position: number
+          speaker_notes: string | null
+          subtitle: string | null
+          title: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          bullets?: Json
+          created_at?: string
+          deck_id: string
+          id?: string
+          layout?: string
+          position?: number
+          speaker_notes?: string | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          bullets?: Json
+          created_at?: string
+          deck_id?: string
+          id?: string
+          layout?: string
+          position?: number
+          speaker_notes?: string | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "slides_deck_id_fkey"
+            columns: ["deck_id"]
+            isOneToOne: false
+            referencedRelation: "decks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "slides_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workspace_members: {
+        Row: {
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_members_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workspaces: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          name?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_workspace_member: {
+        Args: { _user_id: string; _workspace_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
