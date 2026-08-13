@@ -199,8 +199,7 @@ export async function regenerateOneSlide(supabase: Db, slideId: string, nudge: s
     .neq("id", slideId)
     .order("position");
 
-  const result = streamText({
-    model: model(),
+  const output = await generateStructured(slideSchema, {
     system: SYSTEM_PROMPT,
     prompt: regeneratePrompt({
       brief: deck.project_brief ?? "",
@@ -210,10 +209,7 @@ export async function regenerateOneSlide(supabase: Db, slideId: string, nudge: s
       neighbours: (others ?? []).map((o: { title: string }) => o.title),
       nudge,
     }),
-    output: Output.object({ schema: slideSchema }),
   });
-
-  const output = await result.output;
 
   const { error } = await supabase
     .from("slides")
