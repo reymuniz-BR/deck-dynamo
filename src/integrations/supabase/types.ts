@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       deck_sources: {
         Row: {
+          brand: Json | null
           created_at: string
           created_by: string
           deck_id: string
@@ -29,6 +30,7 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
+          brand?: Json | null
           created_at?: string
           created_by: string
           deck_id: string
@@ -42,6 +44,7 @@ export type Database = {
           workspace_id: string
         }
         Update: {
+          brand?: Json | null
           created_at?: string
           created_by?: string
           deck_id?: string
@@ -73,6 +76,7 @@ export type Database = {
       }
       decks: {
         Row: {
+          brand: Json | null
           client_name: string | null
           created_at: string
           created_by: string
@@ -86,6 +90,7 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
+          brand?: Json | null
           client_name?: string | null
           created_at?: string
           created_by: string
@@ -99,6 +104,7 @@ export type Database = {
           workspace_id: string
         }
         Update: {
+          brand?: Json | null
           client_name?: string | null
           created_at?: string
           created_by?: string
