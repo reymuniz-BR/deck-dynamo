@@ -154,6 +154,7 @@ export async function generateDeckSlides(supabase: Db, deckId: string) {
         sourceContext,
         outline,
       }),
+      arrayKey: "slides",
     });
 
     if (output.slides.length === 0) {
