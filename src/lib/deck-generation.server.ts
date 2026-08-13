@@ -121,6 +121,7 @@ export async function generateDeckOutline(supabase: Db, deckId: string) {
       clientName: deck.client_name,
       sourceContext,
     }),
+    arrayKey: "slides",
   });
 
   const outline: OutlineItem[] = output.slides
