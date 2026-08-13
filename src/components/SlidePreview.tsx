@@ -5,9 +5,10 @@ export function SlidePreview({ slide, index }: { slide: Slide; index: number }) 
 
   return (
     <div
-      className={`relative flex aspect-video w-full flex-col overflow-hidden border ${
+      className={`@container relative flex aspect-video w-full flex-col overflow-hidden border ${
         dark ? "border-ink bg-ink text-ink-foreground" : "border-border bg-card text-card-foreground"
       }`}
+
     >
       {dark ? <span className="absolute inset-y-0 left-0 w-[6px] bg-accent" /> : null}
 
