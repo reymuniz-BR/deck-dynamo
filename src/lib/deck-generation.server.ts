@@ -1,4 +1,4 @@
-import { streamText, Output } from "ai";
+import { streamText, Output, NoObjectGeneratedError } from "ai";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createLovableAiGatewayProvider, DECK_MODEL } from "./ai-gateway.server";
@@ -15,13 +15,20 @@ import {
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Db = SupabaseClient<any, any, any>;
 
+// Keep schemas permissive: models routinely omit optional-ish fields, so every
+// non-essential field is nullable/defaulted instead of strictly required.
 const outlineSchema = z.object({
-  slides: z.array(z.object({ title: z.string(), purpose: z.string() })),
+  slides: z.array(
+    z.object({
+      title: z.string(),
+      purpose: z.string().nullable(),
+    }),
+  ),
 });
 
 const slideSchema = z.object({
   title: z.string(),
-  subtitle: z.string(),
+  subtitle: z.string().nullable(),
   bullets: z.array(z.string()),
   speakerNotes: z.string(),
   layout: z.string(),
@@ -33,6 +40,56 @@ function model() {
   const key = process.env["LOVABLE_API_KEY"];
   if (!key) throw new Error("AI is not configured for this project yet.");
   return createLovableAiGatewayProvider(key)(DECK_MODEL);
+}
+
+function extractJson(text: string | undefined): unknown {
+  if (!text) return undefined;
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const candidate = (fenced?.[1] ?? text).trim();
+  const start = candidate.search(/[[{]/);
+  if (start === -1) return undefined;
+  const slice = candidate.slice(start);
+  for (let end = slice.length; end > 0; end--) {
+    const chunk = slice.slice(0, end);
+    try {
+      return JSON.parse(chunk);
+    } catch {
+      /* keep trimming */
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Runs a structured generation and degrades gracefully: if the model output
+ * fails schema validation, we re-parse the raw text and coerce it once more
+ * before surfacing a readable error instead of crashing the feature.
+ */
+async function generateStructured<T extends z.ZodTypeAny>(
+  schema: T,
+  args: { system: string; prompt: string; arrayKey?: string },
+): Promise<z.infer<T>> {
+  try {
+    const result = streamText({
+      model: model(),
+      system: args.system,
+      prompt: args.prompt,
+      output: Output.object({ schema }),
+    });
+    return (await result.output) as z.infer<T>;
+  } catch (error) {
+    if (NoObjectGeneratedError.isInstance(error)) {
+      const raw = extractJson(error.text);
+      // Models sometimes answer with a bare array instead of the wrapper object.
+      const candidate =
+        Array.isArray(raw) && args.arrayKey ? { [args.arrayKey]: raw } : raw;
+      const parsed = schema.safeParse(candidate);
+      if (parsed.success) return parsed.data as z.infer<T>;
+    }
+    throw new Error(
+      "The AI returned an unusable response. Please try again — if it keeps happening, simplify the brief or sources.",
+    );
+  }
 }
 
 async function loadDeck(supabase: Db, deckId: string) {
@@ -57,19 +114,20 @@ async function loadDeck(supabase: Db, deckId: string) {
 export async function generateDeckOutline(supabase: Db, deckId: string) {
   const { deck, sourceContext } = await loadDeck(supabase, deckId);
 
-  const result = streamText({
-    model: model(),
+  const output = await generateStructured(outlineSchema, {
     system: SYSTEM_PROMPT,
     prompt: outlinePrompt({
       brief: deck.project_brief ?? "",
       clientName: deck.client_name,
       sourceContext,
     }),
-    output: Output.object({ schema: outlineSchema }),
+    arrayKey: "slides",
   });
 
-  const output = await result.output;
-  const outline: OutlineItem[] = output.slides.slice(0, 20);
+  const outline: OutlineItem[] = output.slides
+    .slice(0, 20)
+    .map((item) => ({ title: item.title, purpose: item.purpose ?? "" }));
+  if (outline.length === 0) throw new Error("The AI did not return any slides. Please try again.");
 
   const { error } = await supabase
     .from("decks")
@@ -88,8 +146,7 @@ export async function generateDeckSlides(supabase: Db, deckId: string) {
   await supabase.from("decks").update({ stage: "generating" }).eq("id", deckId);
 
   try {
-    const result = streamText({
-      model: model(),
+    const output = await generateStructured(slidesSchema, {
       system: SYSTEM_PROMPT,
       prompt: slidesPrompt({
         brief: deck.project_brief ?? "",
@@ -97,10 +154,12 @@ export async function generateDeckSlides(supabase: Db, deckId: string) {
         sourceContext,
         outline,
       }),
-      output: Output.object({ schema: slidesSchema }),
+      arrayKey: "slides",
     });
 
-    const output = await result.output;
+    if (output.slides.length === 0) {
+      throw new Error("The AI did not return any slides. Please try again.");
+    }
 
     await supabase.from("slides").delete().eq("deck_id", deckId);
 
@@ -146,8 +205,7 @@ export async function regenerateOneSlide(supabase: Db, slideId: string, nudge: s
     .neq("id", slideId)
     .order("position");
 
-  const result = streamText({
-    model: model(),
+  const output = await generateStructured(slideSchema, {
     system: SYSTEM_PROMPT,
     prompt: regeneratePrompt({
       brief: deck.project_brief ?? "",
@@ -157,10 +215,7 @@ export async function regenerateOneSlide(supabase: Db, slideId: string, nudge: s
       neighbours: (others ?? []).map((o: { title: string }) => o.title),
       nudge,
     }),
-    output: Output.object({ schema: slideSchema }),
   });
-
-  const output = await result.output;
 
   const { error } = await supabase
     .from("slides")
