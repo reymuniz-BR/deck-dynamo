@@ -1,4 +1,4 @@
-import { streamText, Output } from "ai";
+import { streamText, Output, NoObjectGeneratedError } from "ai";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createLovableAiGatewayProvider, DECK_MODEL } from "./ai-gateway.server";
