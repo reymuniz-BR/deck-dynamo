@@ -13,7 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { addSource, uploadSourceFile } from "@/lib/deck-queries";
+import { addSource, setDeckBrand, uploadSourceFile } from "@/lib/deck-queries";
+import { extractBrandFromPptx } from "@/lib/extract-brand";
 import { ACCEPTED_FILE_TYPES, extractFileText } from "@/lib/extract-text";
 import { RELEVANCE_LABELS, type DeckSource } from "@/lib/deck-types";
 
@@ -55,11 +56,18 @@ export function SourceCollector({
     setBusy(true);
     try {
       for (const file of Array.from(files)) {
-        const [path, text] = await Promise.all([
+        const isPptx = file.name.toLowerCase().endsWith(".pptx");
+        const [path, text, brand] = await Promise.all([
           uploadSourceFile(workspaceId, deckId, file),
           extractFileText(file),
+          isPptx ? extractBrandFromPptx(file) : Promise.resolve(null),
         ]);
+        if (brand && relevance !== "content") {
+          await setDeckBrand(deckId, brand);
+          toast.success(`Branding picked up from ${file.name}`);
+        }
         await addSource({
+          brand,
           deckId,
           workspaceId,
           userId,
