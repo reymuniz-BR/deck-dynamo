@@ -86,6 +86,7 @@ async function generateStructured<T extends z.ZodTypeAny>(
       system: args.system,
       prompt: args.prompt,
       output: Output.object({ schema }),
+      providerOptions: RESPONSES_OPTIONS,
     });
     return (await result.output) as z.infer<T>;
   } catch (error) {
