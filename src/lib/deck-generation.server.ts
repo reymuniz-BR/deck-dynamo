@@ -39,8 +39,19 @@ const slidesSchema = z.object({ slides: z.array(slideSchema) });
 function model() {
   const key = process.env["LOVABLE_API_KEY"];
   if (!key) throw new Error("AI is not configured for this project yet.");
-  return createLovableAiGatewayProvider(key)(DECK_MODEL);
+  return createLovableResponsesProvider(key).responses(DECK_MODEL);
 }
+
+// GPT-5.6 is a reasoning model on the Responses API: keep reasoning on and
+// `store: false` since the gateway is stateless.
+const RESPONSES_OPTIONS = {
+  openai: {
+    forceReasoning: true,
+    reasoningEffort: "medium",
+    reasoningSummary: "auto",
+    store: false,
+  },
+} as const;
 
 function extractJson(text: string | undefined): unknown {
   if (!text) return undefined;
