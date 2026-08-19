@@ -1,12 +1,13 @@
-import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { createOpenAI } from "@ai-sdk/openai";
 
-export function createLovableAiGatewayProvider(apiKey: string) {
-  return createOpenAICompatible({
-    name: "lovable",
+/**
+ * Lovable AI Gateway provider for OpenAI models served through the
+ * Responses API (`/v1/responses`) — required for the GPT-5.6 family.
+ */
+export function createLovableResponsesProvider(apiKey: string) {
+  return createOpenAI({
     baseURL: "https://ai.gateway.lovable.dev/v1",
-    // Without this the SDK sends json_object and the schema is never enforced,
-    // which is what produced "No object generated: response did not match schema".
-    supportsStructuredOutputs: true,
+    apiKey,
     headers: {
       "Lovable-API-Key": apiKey,
       "X-Lovable-AIG-SDK": "vercel-ai-sdk",
@@ -14,4 +15,4 @@ export function createLovableAiGatewayProvider(apiKey: string) {
   });
 }
 
-export const DECK_MODEL = "google/gemini-3.6-flash";
+export const DECK_MODEL = "openai/gpt-5.6-sol";
