@@ -66,8 +66,9 @@ CLIENT: ${input.clientName || "(not specified)"}
 SOURCES SHARED BY THE USER:
 ${input.sourceContext || "(no sources shared)"}
 
-Produce between 8 and 14 slides. If any source is marked relevant for "template" or "both", mirror that deck's section order and section naming as closely as the brief allows. Otherwise use a strong standard BD arc.
-For each slide give a concrete title (not a generic section label) and a one-sentence purpose describing what that slide must land.`;
+Produce between 8 and 14 slides. If any source is marked relevant for "template" or "both", mirror that deck's section order and section naming as closely as the brief allows. Otherwise use a strong standard arc: open on the stakes, establish what is already built, name the gap, lay out the approach, prove it with a piece of real work, set out scope and ownership, then close on decisions and next steps.
+Use a section divider only where the deck genuinely turns a corner, and include at least one slide of concrete proof if the sources support one.
+For each slide give a concrete title written as an assertive claim (not a generic section label) and a one-sentence purpose describing what that slide must land.`;
 }
 
 export function slidesPrompt(input: {
@@ -89,10 +90,27 @@ ${input.outline.map((item, i) => `${i + 1}. ${item.title} — ${item.purpose}`).
 SOURCES:
 ${input.sourceContext || "(no sources shared)"}
 
-For every slide return: title, an optional one-line subtitle, 3 to 5 bullets (each under 20 words), speaker notes of 2-3 sentences the presenter can say out loud, and a layout chosen from: ${SLIDE_LAYOUTS.join(", ")}.
-Use "title" for the opening slide and "closing" for the final next-steps slide.
-Use "section" sparingly, as a divider between the major parts of the deck: a short title, optionally a one-line kicker as the subtitle, and no bullets.
-Use "two-column" only for a real contrast (before/after, problem/solution, them/us): give 4 to 6 bullets that read naturally when split evenly into a left and a right half.`;
+For every slide return: title, subtitle, bullets, speaker notes of 2-3 sentences the presenter can say out loud, and a layout from the approved list.
+
+HOW TO WRITE EACH FIELD
+- title: an assertive, complete claim the rest of the slide then proves, roughly 6 to 14 words. "Stable insurance supports stable homes", not "Insurance overview". Never a bare topic label.
+- subtitle: a short category eyebrow or a one-line framing sentence. Keep it under 12 words.
+- bullets: write each one as "Short label: full sentence." The label is 2 to 5 words and names the idea; the sentence that follows is a real sentence of 15 to 30 words. Example: "Rising premiums: Higher insurance costs consume operating dollars that would otherwise fund repairs and resident services." Never write bare fragments.
+- Give content slides 3 to 5 bullets. Four is usually right. Never more than five.
+
+THE APPROVED LAYOUTS (${SLIDE_LAYOUTS.join(", ")})
+- title: the opening slide. Give it a title and subtitle and NO bullets at all.
+- closing: the final next-steps slide.
+- section: a divider between major parts of the deck. Short title, optional kicker as subtitle, NO bullets. Use sparingly, and only when the deck genuinely turns a corner.
+- quote: a single quotation as the title, the attribution as the subtitle, NO bullets.
+- bullets: the standard content slide.
+- two-column: a real contrast only (before and after, problem and solution, them and us). Give 4 or 6 bullets that split evenly into two halves.
+- pillars: exactly 3 parallel ideas of equal weight, such as three services or three principles. Each bullet is one pillar in "Label: sentence" form.
+- process: sequential steps that happen in order. 3 to 5 bullets, each a step in "Label: sentence" form. Use this when order matters; use pillars when it does not.
+- stat: 3 findings that each lead with a number or a bracketed placeholder. Example: "50+ endorsers: Organizations across the state have signed the campaign principles."
+- case-study: one piece of proof. Put the client or project name in the title, and give exactly three bullets labelled "Goal:", "Approach:" and "Impact:" in that order.
+
+Vary the layouts. A deck that is ten bullet slides in a row has failed. Reach for pillars, process, stat and case-study wherever the content genuinely fits one, and if a single topic needs two slides, title them "(1 of 2)" and "(2 of 2)".`;
 }
 
 export function regeneratePrompt(input: {

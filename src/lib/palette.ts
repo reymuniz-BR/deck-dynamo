@@ -55,7 +55,9 @@ export function getSlidePalette(
   }
 
   const f = familyFor(position);
-  if (layout === "section") {
+  // Case studies get the same full-bleed dark treatment as a section break: in a
+  // real deck they read as a deliberate change of register, not another list.
+  if (layout === "section" || layout === "case-study") {
     return {
       dark: f.dark,
       light: NEUTRALS.white,
@@ -82,7 +84,7 @@ export function getSlidePalette(
 function getSlideLogo(brand: Brand, layout: SlideLayout): string | null {
   if (!isOrchestraBrand(brand)) return brand.logo;
   if (layout === "title" || layout === "closing") return ORCHESTRA_LOGO_MINT;
-  if (layout === "section") return ORCHESTRA_LOGO_WHITE;
+  if (layout === "section" || layout === "case-study") return ORCHESTRA_LOGO_WHITE;
   return ORCHESTRA_LOGO_FOREST;
 }
 
