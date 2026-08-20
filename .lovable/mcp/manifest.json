@@ -1,0 +1,208 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.2",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://gbhkyfdlfkwbckaqxhxh.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "deck-dynamo",
+      "version": "0.1.0",
+      "title": "Deck Dynamo"
+    },
+    "tools": [
+      {
+        "name": "list_decks",
+        "title": "List decks",
+        "description": "List the signed-in user's business development decks, newest first, with title, client, stage and slide count.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "default": 20,
+              "description": "How many decks to return.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_deck",
+        "title": "Get deck",
+        "description": "Read one deck in full: brief, outline, every slide (title, subtitle, bullets, speaker notes) and its source material labels.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "deckId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The deck's id."
+            }
+          },
+          "required": [
+            "deckId"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_deck",
+        "title": "Create deck",
+        "description": "Start a new business development deck in the user's workspace with a title, optional client name and project brief. Slide generation still happens in the app.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "description": "Deck title."
+            },
+            "clientName": {
+              "description": "Client or prospect name.",
+              "type": "string",
+              "maxLength": 200
+            },
+            "projectBrief": {
+              "description": "What the project is about, who it is for and what the deck must achieve.",
+              "type": "string",
+              "maxLength": 10000
+            }
+          },
+          "required": [
+            "title"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "add_deck_note",
+        "title": "Add deck note",
+        "description": "Attach a written note or reference summary to a deck as source material the deck generator will draw on.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "deckId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The deck to attach the note to."
+            },
+            "label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "description": "Short label for the note."
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "description": "The note content."
+            },
+            "relevance": {
+              "default": "content",
+              "description": "Whether this informs the content, the template/structure, or both.",
+              "type": "string",
+              "enum": [
+                "content",
+                "template",
+                "both"
+              ]
+            },
+            "whyRelevant": {
+              "description": "Why this material matters for this deck.",
+              "type": "string",
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "deckId",
+            "label",
+            "text"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "update_slide",
+        "title": "Update slide",
+        "description": "Edit the copy on one slide: title, subtitle, bullets or speaker notes. Only the fields you pass are changed.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "slideId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The slide's id (from get_deck)."
+            },
+            "title": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "subtitle": {
+              "type": "string",
+              "maxLength": 300
+            },
+            "bullets": {
+              "maxItems": 8,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 300
+              }
+            },
+            "speakerNotes": {
+              "type": "string",
+              "maxLength": 4000
+            }
+          },
+          "required": [
+            "slideId"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
