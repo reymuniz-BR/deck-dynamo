@@ -63,8 +63,22 @@ export function SourceCollector({
           isPptx ? extractBrandFromPptx(file) : Promise.resolve(null),
         ]);
         if (brand && relevance !== "content") {
-          await setDeckBrand(deckId, brand);
-          toast.success(`Branding picked up from ${file.name}`);
+          // Never silently replace the deck's branding: applying the extracted
+          // brand is an explicit choice.
+          toast(`Found brand colors in ${file.name}`, {
+            description: "The deck keeps Orchestra branding unless you apply them.",
+            action: {
+              label: "Apply branding",
+              onClick: () => {
+                setDeckBrand(deckId, brand)
+                  .then(() => {
+                    toast.success(`Branding applied from ${file.name}`);
+                    onChanged();
+                  })
+                  .catch(() => toast.error("Could not apply the branding"));
+              },
+            },
+          });
         }
         await addSource({
           brand,

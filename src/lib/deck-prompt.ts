@@ -1,3 +1,5 @@
+import { SLIDE_LAYOUTS } from "./slide-layouts";
+
 export type SourceRow = {
   label: string;
   kind: string;
@@ -46,7 +48,8 @@ Rules you never break:
 - Use only facts present in the supplied sources or project brief. Never invent metrics, client names, case-study results, dates or quotes.
 - Where a real figure is clearly needed but unavailable, write a visible placeholder like [ADD Q3 REVENUE] instead of guessing.
 - Match the vocabulary, tone and structure of the sources the user marked as template/structure references.
-- Slide copy is punchy and spoken-word ready: short bullets, no filler, no marketing fluff.`;
+- Slide copy is punchy and spoken-word ready: short bullets, no filler, no marketing fluff.
+- Write every title and subtitle in sentence case: capitalize only the first word and proper nouns, never Title Case.`;
 
 export function outlinePrompt(input: {
   brief: string;
@@ -86,8 +89,10 @@ ${input.outline.map((item, i) => `${i + 1}. ${item.title} — ${item.purpose}`).
 SOURCES:
 ${input.sourceContext || "(no sources shared)"}
 
-For every slide return: title, an optional one-line subtitle, 3 to 5 bullets (each under 20 words), speaker notes of 2-3 sentences the presenter can say out loud, and a layout chosen from: title, bullets, two-column, stat, quote, closing.
-Use "title" for the opening slide and "closing" for the final next-steps slide.`;
+For every slide return: title, an optional one-line subtitle, 3 to 5 bullets (each under 20 words), speaker notes of 2-3 sentences the presenter can say out loud, and a layout chosen from: ${SLIDE_LAYOUTS.join(", ")}.
+Use "title" for the opening slide and "closing" for the final next-steps slide.
+Use "section" sparingly, as a divider between the major parts of the deck: a short title, optionally a one-line kicker as the subtitle, and no bullets.
+Use "two-column" only for a real contrast (before/after, problem/solution, them/us): give 4 to 6 bullets that read naturally when split evenly into a left and a right half.`;
 }
 
 export function regeneratePrompt(input: {

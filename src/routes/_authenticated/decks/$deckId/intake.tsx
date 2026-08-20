@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, Loader2, Sparkles, Trash2 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { GenerationOverlay } from "@/components/GenerationOverlay";
 import { SourceCollector } from "@/components/SourceCollector";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -159,7 +160,9 @@ function Intake() {
           </section>
         ) : null}
 
-        {step === 3 ? (
+        {step === 3 && working === "outline" ? <GenerationOverlay kind="outline" /> : null}
+
+        {step === 3 && working !== "outline" ? (
           <section className="mt-10">
             <p className="label-caps text-accent">Step 3 of 3</p>
             <h1 className="mt-2 text-4xl leading-tight">
@@ -188,18 +191,16 @@ function Intake() {
                 Back
               </Button>
               <Button size="lg" onClick={buildOutline} disabled={working !== null}>
-                {working === "outline" ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Sparkles className="mr-2 h-4 w-4" />
-                )}
-                {working === "outline" ? "Drafting outline…" : "Create the deck outline"}
+                <Sparkles className="mr-2 h-4 w-4" />
+                Create the deck outline
               </Button>
             </div>
           </section>
         ) : null}
 
-        {step === 4 ? (
+        {step === 4 && working === "slides" ? <GenerationOverlay kind="slides" /> : null}
+
+        {step === 4 && working !== "slides" ? (
           <section className="mt-10">
             <p className="label-caps text-accent">Outline</p>
             <h1 className="mt-2 text-4xl leading-tight">Check the shape before I write it</h1>
@@ -259,17 +260,9 @@ function Intake() {
               <Button variant="ghost" onClick={() => setStep(3)}>
                 Back to sources
               </Button>
-              <Button
-                size="lg"
-                onClick={build}
-                disabled={working !== null || outline.length === 0}
-              >
-                {working === "slides" ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Sparkles className="mr-2 h-4 w-4" />
-                )}
-                {working === "slides" ? "Writing your deck…" : "Generate the deck"}
+              <Button size="lg" onClick={build} disabled={working !== null || outline.length === 0}>
+                <Sparkles className="mr-2 h-4 w-4" />
+                Generate the deck
               </Button>
             </div>
           </section>

@@ -11,6 +11,7 @@ import {
   type OutlineItem,
   type SourceRow,
 } from "./deck-prompt";
+import { SLIDE_LAYOUTS } from "./slide-layouts";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Db = SupabaseClient<any, any, any>;
@@ -31,7 +32,9 @@ const slideSchema = z.object({
   subtitle: z.string().nullable(),
   bullets: z.array(z.string()),
   speakerNotes: z.string(),
-  layout: z.string(),
+  // Approved layouts only; a stray value degrades to "bullets" instead of
+  // failing the whole generation.
+  layout: z.enum(SLIDE_LAYOUTS).catch("bullets"),
 });
 
 const slidesSchema = z.object({ slides: z.array(slideSchema) });
@@ -93,8 +96,7 @@ async function generateStructured<T extends z.ZodTypeAny>(
     if (NoObjectGeneratedError.isInstance(error)) {
       const raw = extractJson(error.text);
       // Models sometimes answer with a bare array instead of the wrapper object.
-      const candidate =
-        Array.isArray(raw) && args.arrayKey ? { [args.arrayKey]: raw } : raw;
+      const candidate = Array.isArray(raw) && args.arrayKey ? { [args.arrayKey]: raw } : raw;
       const parsed = schema.safeParse(candidate);
       if (parsed.success) return parsed.data as z.infer<T>;
     }
