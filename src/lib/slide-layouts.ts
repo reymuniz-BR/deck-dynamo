@@ -24,11 +24,18 @@ export const LAYOUT_LABELS: Record<SlideLayout, string> = {
   closing: "Closing",
 };
 
-/** Anything outside the approved set renders as plain bullets. */
+/**
+ * Canonicalizes a layout name; anything outside the approved set becomes plain
+ * bullets. Tolerates the spacing and casing variants models reach for
+ * ("Two Column", "two_column") rather than discarding a usable slide.
+ */
 export function normalizeLayout(value: string | null | undefined): SlideLayout {
-  return value && (SLIDE_LAYOUTS as readonly string[]).includes(value)
-    ? (value as SlideLayout)
-    : "bullets";
+  if (!value) return "bullets";
+  const key = value
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_]+/g, "-");
+  return (SLIDE_LAYOUTS as readonly string[]).includes(key) ? (key as SlideLayout) : "bullets";
 }
 
 /** Split bullets into the two halves of a two-column slide. */

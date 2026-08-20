@@ -11,7 +11,7 @@ import {
   type OutlineItem,
   type SourceRow,
 } from "./deck-prompt";
-import { SLIDE_LAYOUTS } from "./slide-layouts";
+import { SLIDE_LAYOUTS, normalizeLayout } from "./slide-layouts";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Db = SupabaseClient<any, any, any>;
@@ -32,9 +32,11 @@ const slideSchema = z.object({
   subtitle: z.string().nullable(),
   bullets: z.array(z.string()),
   speakerNotes: z.string(),
-  // Approved layouts only; a stray value degrades to "bullets" instead of
-  // failing the whole generation.
-  layout: z.enum(SLIDE_LAYOUTS).catch("bullets"),
+  // Approved layouts only. This must stay a bare enum: wrapping it in
+  // `.catch()` drops the field out of the generated JSON schema's `required`
+  // list, and the Responses API rejects a strict schema whose properties and
+  // required list disagree (immediate 400, no tokens spent).
+  layout: z.enum(SLIDE_LAYOUTS),
 });
 
 const slidesSchema = z.object({ slides: z.array(slideSchema) });
@@ -100,8 +102,13 @@ async function generateStructured<T extends z.ZodTypeAny>(
       const parsed = schema.safeParse(candidate);
       if (parsed.success) return parsed.data as z.infer<T>;
     }
+    // Surface the provider's actual complaint. A schema or gateway rejection
+    // reads nothing like a model that wrote bad prose, and collapsing both into
+    // one message makes the difference invisible.
+    const reason = error instanceof Error ? error.message : String(error);
+    console.error("[deck-generation] failed:", reason, error);
     throw new Error(
-      "The AI returned an unusable response. Please try again — if it keeps happening, simplify the brief or sources.",
+      `The AI could not complete this step: ${reason.slice(0, 400) || "no details returned"}`,
     );
   }
 }
@@ -185,7 +192,7 @@ export async function generateDeckSlides(supabase: Db, deckId: string) {
       subtitle: slide.subtitle?.slice(0, 300) ?? null,
       bullets: (slide.bullets ?? []).slice(0, 8).map((b) => b.slice(0, 300)),
       speaker_notes: slide.speakerNotes ?? "",
-      layout: slide.layout || "bullets",
+      layout: normalizeLayout(slide.layout),
     }));
 
     const { error } = await supabase.from("slides").insert(rows);
@@ -238,7 +245,7 @@ export async function regenerateOneSlide(supabase: Db, slideId: string, nudge: s
       subtitle: output.subtitle?.slice(0, 300) ?? null,
       bullets: (output.bullets ?? []).slice(0, 8).map((b) => b.slice(0, 300)),
       speaker_notes: output.speakerNotes ?? "",
-      layout: output.layout || "bullets",
+      layout: normalizeLayout(output.layout),
     })
     .eq("id", slideId);
   if (error) throw new Error(error.message);
