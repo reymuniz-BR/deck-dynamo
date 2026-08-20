@@ -19,5 +19,9 @@ export default defineMcp({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated",
   }),
-  tools: [listDecks, getDeck, createDeck, addDeckNote, updateSlide],
+  // Cast: the SDK's tool type is stricter than inferred defs under
+  // exactOptionalPropertyTypes (optional `outputSchema`).
+  tools: [listDecks, getDeck, createDeck, addDeckNote, updateSlide] as unknown as Parameters<
+    typeof defineMcp
+  >[0]["tools"],
 });
