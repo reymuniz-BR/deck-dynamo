@@ -24,8 +24,8 @@ import { regenerateSlide } from "@/lib/deck.functions";
 import { exportDeckToPptx } from "@/lib/export-pptx";
 import type { Slide } from "@/lib/deck-types";
 import { brandOrDefault } from "@/lib/brand";
-
-const LAYOUTS = ["title", "bullets", "two-column", "stat", "quote", "closing"];
+import { LAYOUT_LABELS, SLIDE_LAYOUTS } from "@/lib/slide-layouts";
+import { familySwatches } from "@/lib/palette";
 
 export const Route = createFileRoute("/_authenticated/decks/$deckId/")({
   head: () => ({
@@ -164,7 +164,7 @@ function DeckEditor() {
             <div className="mt-3 flex items-center gap-2">
               <span className="label-caps text-muted-foreground">Branding</span>
               <span className="flex items-center gap-1">
-                {[brand.colors.dark, brand.colors.accent, brand.colors.tint].map((c) => (
+                {familySwatches(brand).map((c) => (
                   <span
                     key={c}
                     className="h-3.5 w-3.5 border border-border"
@@ -230,7 +230,9 @@ function DeckEditor() {
             </aside>
 
             <div>
-              {draft ? <SlidePreview slide={draft} index={slides.indexOf(active!)} brand={brand} /> : null}
+              {draft ? (
+                <SlidePreview slide={draft} index={slides.indexOf(active!)} brand={brand} />
+              ) : null}
 
               <div className="mt-6 border border-border bg-card p-5">
                 <p className="label-caps text-muted-foreground">Rewrite with AI</p>
@@ -316,9 +318,9 @@ function DeckEditor() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {LAYOUTS.map((layout) => (
+                      {SLIDE_LAYOUTS.map((layout) => (
                         <SelectItem key={layout} value={layout}>
-                          {layout}
+                          {LAYOUT_LABELS[layout]}
                         </SelectItem>
                       ))}
                     </SelectContent>

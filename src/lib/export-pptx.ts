@@ -1,15 +1,10 @@
 import type { Deck, Slide } from "./deck-types";
 import { brandOrDefault, fontFace, hex, type Brand } from "./brand";
+import { normalizeLayout, splitColumns } from "./slide-layouts";
+import { slideTheme } from "./palette";
 
 export async function exportDeckToPptx(deck: Deck, slides: Slide[], brandInput?: Brand) {
   const brand = brandInput ?? brandOrDefault(deck.brand);
-  const INK = hex(brand.colors.dark);
-  const ACCENT = hex(brand.colors.accent);
-  const TINT = hex(brand.colors.tint);
-  const LIGHT = hex(brand.colors.light);
-  const HEADING = hex(brand.colors.heading);
-  const BODY = hex(brand.colors.body);
-  const ON_DARK = hex(brand.colors.onDark);
   const HEAD_FONT = fontFace(brand.fonts.heading);
   const BODY_FONT = fontFace(brand.fonts.body);
 
@@ -19,21 +14,64 @@ export async function exportDeckToPptx(deck: Deck, slides: Slide[], brandInput?:
   pptx.author = "Deck Studio";
   pptx.title = deck.title;
 
-  const addLogo = (s: ReturnType<typeof pptx.addSlide>) => {
-    if (!brand.logo) return;
+  const addLogo = (s: ReturnType<typeof pptx.addSlide>, logo: string | null) => {
+    if (!logo) return;
     try {
-      s.addImage({ data: brand.logo, x: 8.1, y: 0.25, w: 1.2, h: 0.5, sizing: { type: "contain", w: 1.2, h: 0.5 } });
+      s.addImage({
+        data: logo,
+        x: 8.1,
+        y: 0.25,
+        w: 1.2,
+        h: 0.5,
+        sizing: { type: "contain", w: 1.2, h: 0.5 },
+      });
     } catch {
       /* ignore unusable logo data */
     }
   };
 
-  for (const slide of slides) {
+  slides.forEach((slide, index) => {
+    const layout = normalizeLayout(slide.layout);
+    // Per-slide colors and logo, matching SlidePreview exactly.
+    const theme = slideTheme(brand, layout, index);
+    const INK = hex(theme.colors.dark);
+    const ACCENT = hex(theme.colors.accent);
+    const TINT = hex(theme.colors.tint);
+    const LIGHT = hex(theme.colors.light);
+    const HEADING = hex(theme.colors.heading);
+    const BODY = hex(theme.colors.body);
+    const ON_DARK = hex(theme.colors.onDark);
+
     const s = pptx.addSlide();
-    const isDark = slide.layout === "title" || slide.layout === "closing";
+    const isDark = layout === "title" || layout === "closing" || layout === "section";
     s.background = { color: isDark ? INK : LIGHT };
 
-    if (isDark) {
+    if (layout === "section") {
+      s.addShape("rect", { x: 0, y: 0, w: 0.18, h: 5.63, fill: { color: ACCENT } });
+      if (slide.subtitle) {
+        s.addText(slide.subtitle.toUpperCase(), {
+          x: 0.8,
+          y: 1.6,
+          w: 8.4,
+          h: 0.5,
+          fontSize: 13,
+          charSpacing: 3,
+          color: ON_DARK,
+          fontFace: BODY_FONT,
+        });
+      }
+      s.addText(slide.title, {
+        x: 0.8,
+        y: 2.1,
+        w: 8.4,
+        h: 1.6,
+        fontSize: 40,
+        bold: true,
+        color: ON_DARK,
+        fontFace: HEAD_FONT,
+      });
+      addLogo(s, theme.logo);
+    } else if (isDark) {
       s.addShape("rect", { x: 0, y: 0, w: 0.18, h: 5.63, fill: { color: ACCENT } });
       s.addText(slide.title, {
         x: 0.8,
@@ -71,7 +109,8 @@ export async function exportDeckToPptx(deck: Deck, slides: Slide[], brandInput?:
           },
         );
       }
-    } else if (slide.layout === "stat" && slide.bullets.length) {
+      addLogo(s, theme.logo);
+    } else if (layout === "stat" && slide.bullets.length) {
       s.addText(slide.title, {
         x: 0.7,
         y: 0.5,
@@ -103,8 +142,8 @@ export async function exportDeckToPptx(deck: Deck, slides: Slide[], brandInput?:
           valign: "middle",
         });
       });
-      addLogo(s);
-    } else if (slide.layout === "quote") {
+      addLogo(s, theme.logo);
+    } else if (layout === "quote") {
       s.background = { color: TINT };
       s.addText(slide.title, {
         x: 1.0,
@@ -127,7 +166,7 @@ export async function exportDeckToPptx(deck: Deck, slides: Slide[], brandInput?:
           fontFace: BODY_FONT,
         });
       }
-      addLogo(s);
+      addLogo(s, theme.logo);
     } else {
       s.addText(slide.title, {
         x: 0.7,
@@ -151,7 +190,28 @@ export async function exportDeckToPptx(deck: Deck, slides: Slide[], brandInput?:
         });
       }
       s.addShape("rect", { x: 0.7, y: 1.95, w: 1.1, h: 0.06, fill: { color: ACCENT } });
-      if (slide.bullets.length) {
+      if (layout === "two-column" && slide.bullets.length) {
+        const [left, right] = splitColumns(slide.bullets);
+        const columnText = (bullets: string[], x: number) => {
+          if (!bullets.length) return;
+          s.addText(
+            bullets.map((b) => ({ text: b, options: { bullet: true } })),
+            {
+              x,
+              y: 2.25,
+              w: 4.0,
+              h: 2.8,
+              fontSize: 17,
+              color: BODY,
+              fontFace: BODY_FONT,
+              lineSpacingMultiple: 1.35,
+            },
+          );
+        };
+        columnText(left, 0.7);
+        columnText(right, 5.15);
+        s.addShape("rect", { x: 4.95, y: 2.35, w: 0.02, h: 2.5, fill: { color: TINT } });
+      } else if (slide.bullets.length) {
         s.addText(
           slide.bullets.map((b) => ({ text: b, options: { bullet: true } })),
           {
@@ -166,11 +226,11 @@ export async function exportDeckToPptx(deck: Deck, slides: Slide[], brandInput?:
           },
         );
       }
-      addLogo(s);
+      addLogo(s, theme.logo);
     }
 
     if (slide.speaker_notes) s.addNotes(slide.speaker_notes);
-  }
+  });
 
   const fileName = `${deck.title.replace(/[^a-z0-9]+/gi, "-").toLowerCase() || "deck"}.pptx`;
   await pptx.writeFile({ fileName });
