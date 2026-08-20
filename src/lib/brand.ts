@@ -15,18 +15,24 @@ export type Brand = {
   logo: string | null; // data URL
 };
 
+// Orchestra brand: forest + mint hero pair, Manrope/IBM Plex Serif as the
+// approved Google-font substitutes for Degular/Proxima Sera. Per-slide color
+// rotation and logo selection live in palette.ts, keyed off this `source` value.
 export const DEFAULT_BRAND: Brand = {
-  source: "Deck Studio default",
+  source: "Orchestra default",
   colors: {
-    dark: "#1F2733",
+    dark: "#223307",
     light: "#FFFFFF",
-    tint: "#F2EDE4",
-    accent: "#C05621",
-    heading: "#1F2733",
-    body: "#3A4351",
-    onDark: "#FFFFFF",
+    tint: "#E7FFD9",
+    accent: "#223307",
+    heading: "#222222",
+    body: "#333333",
+    onDark: "#E7FFD9",
   },
-  fonts: { heading: "Georgia, 'Instrument Serif', serif", body: "Calibri, 'Work Sans', sans-serif" },
+  fonts: {
+    heading: "'Manrope', ui-sans-serif, system-ui, sans-serif",
+    body: "'IBM Plex Serif', Georgia, serif",
+  },
   logo: null,
 };
 
