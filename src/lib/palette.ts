@@ -19,10 +19,13 @@ export const NEUTRALS = {
 /** Forest + mint: the hero pair, reserved for opening and closing slides. */
 export const HERO_FAMILY: ColorFamily = { name: "forest", dark: "#223307", light: "#E7FFD9" };
 
+// Pairings are fixed by the Orchestra master design system's colorRotation
+// (catalog.json v3). Each dark tone has one correct light partner; mixing them
+// across families is exactly the brand drift this pipeline exists to prevent.
 export const SECONDARY_FAMILIES: ColorFamily[] = [
-  { name: "slate", dark: "#29293F", light: "#B5E6EC" },
-  { name: "harbor", dark: "#1F4C76", light: "#FFECBA" },
-  { name: "rose", dark: "#A53548", light: "#FCC4AB" },
+  { name: "slate", dark: "#29293F", light: "#FCC4AB" },
+  { name: "blue", dark: "#1F4C76", light: "#B5E6EC" },
+  { name: "maroon", dark: "#A53548", light: "#FFECBA" },
 ];
 
 export function isOrchestraBrand(brand: Brand): boolean {
